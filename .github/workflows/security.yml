@@ -1,25 +1,24 @@
-name: DevSecOps Pipeline - Cloud Build
+name: DevSecOps Pipeline - SAST & Secrets
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ "main" ]
 
 jobs:
-  build:
+  security-scan:
     runs-on: ubuntu-latest
-    
     steps:
-      - name: Checkout code
+      - name: Codice di checkout
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: 🔒 Esegui Secret Scanning con GitLeaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build Docker Image securely
-        uses: docker/build-push-action@v5
+      - name: 🔍 Esegui Analisi Statica (SAST) con Semgrep
+        uses: returntocorp/semgrep-action@v1
         with:
-          context: ./back-end
-          push: false
-          tags: secure-backend:latest
+          config: auto
